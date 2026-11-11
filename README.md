@@ -2,6 +2,8 @@
 
 Gráficos Semanal + Diário lado a lado, estilo TradingView.
 
+![Trading Charts](TradingCharts.jpeg)
+
 - Candles verde/vermelho, volume colorido
 - Bollinger Bands (20, 2), EMA 8 (verde), 21 (amarelo), 50 (azul), 200 (vermelho)
 - Painéis inferiores: RSI 14, MACD (12, 26, 9), Squeeze Momentum (LazyBear)

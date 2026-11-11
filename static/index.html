@@ -74,6 +74,9 @@
     font-size: 11px; line-height: 1.5; color: var(--text); }
   .legend span { margin-right: 8px; }
 
+  footer { padding: 3px 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--text); }
   #toasts { position: fixed; right: 16px; bottom: 16px; z-index: 50; display: flex; flex-direction: column; gap: 8px; max-width: calc(100vw - 32px); }
   .toast { background: var(--panel); border: 1px solid var(--border); border-left: 4px solid var(--accent);
     border-radius: 4px; padding: 10px 14px; min-width: 240px; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
@@ -130,6 +133,7 @@
   </div>
 </div>
 
+<footer>Gráficos por <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a> · Dados: Yahoo Finance</footer>
 <div id="toasts"></div>
 <script src="lightweight-charts.js"></script>
 <script src="app.js"></script>

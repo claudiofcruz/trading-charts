@@ -12,7 +12,7 @@ const C = {
 
 const BASE = {
   autoSize: true,
-  layout: { background: { type: 'solid', color: '#131722' }, textColor: '#d1d4dc', fontSize: 11 },
+  layout: { background: { type: 'solid', color: '#131722' }, textColor: '#d1d4dc', fontSize: 11, attributionLogo: false },
   grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
   rightPriceScale: { borderColor: '#2a2e39', minimumWidth: 80 },
   timeScale: { borderColor: '#2a2e39', visible: false, rightOffset: 5 },
