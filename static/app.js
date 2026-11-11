@@ -502,6 +502,53 @@ function notify(ticker, tf, sig, price) {
   setTimeout(() => el.remove(), 15_000);
 }
 
+// ============================================================ divisória semanal | diário
+(() => {
+  const charts = document.querySelector('.charts'), bar = $('splitter');
+  const MIN = 15, MAX = 85;  // % mínimo/máximo de cada lado
+  const apply = pct => charts.style.setProperty('--split', `${pct}%`);
+  apply(+store.get('split', 50) || 50);
+
+  let dragging = false;
+  const move = e => {
+    if (!dragging) return;
+    e.preventDefault();
+    const r = charts.getBoundingClientRect();
+    const pct = Math.min(MAX, Math.max(MIN, (e.clientX - r.left) / r.width * 100));
+    apply(pct.toFixed(1));
+  };
+  const end = () => {
+    if (!dragging) return;
+    dragging = false;
+    bar.classList.remove('dragging');
+    document.body.classList.remove('resizing');
+    store.set('split', parseFloat(charts.style.getPropertyValue('--split')) || 50);
+  };
+  const start = e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();                       // evita seleção de texto / arrastar conteúdo
+    window.getSelection()?.removeAllRanges();
+    dragging = true;
+    bar.classList.add('dragging');
+    document.body.classList.add('resizing');
+  };
+  // eventos no documento inteiro: funciona mesmo com o mouse sobre os gráficos (Chrome, Safari, Firefox)
+  if (window.PointerEvent) {
+    bar.addEventListener('pointerdown', start);
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', end);
+    document.addEventListener('pointercancel', end);
+  } else {
+    bar.addEventListener('mousedown', start);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', end);
+  }
+  window.addEventListener('blur', end);
+  bar.addEventListener('dragstart', e => e.preventDefault());
+  document.querySelector('.charts').addEventListener('dragstart', e => e.preventDefault());
+  bar.addEventListener('dblclick', () => { apply(50); store.set('split', 50); });
+})();
+
 // ============================================================ início
 $('go').onclick = () => load(input.value);
 input.addEventListener('keydown', e => e.key === 'Enter' && load(input.value));

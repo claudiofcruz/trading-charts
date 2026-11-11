@@ -7,6 +7,7 @@ Gráficos Semanal + Diário lado a lado, estilo TradingView, para o mercado amer
 ## Funcionalidades
 
 - Gráfico **Semanal** e **Diário** lado a lado, com zoom, rolagem e crosshair sincronizados entre os painéis
+- **Divisória arrastável** entre semanal e diário para ajustar a largura de cada um (duplo clique volta para 50/50)
 - Dados do Yahoo Finance (yfinance). Ex.: `AAPL`, `SPY`, `QQQ`, `NVDA`, `^GSPC`
 - **Watchlist** lateral (ordem alfabética) com preço, variação do dia e sinais
 - **Scanner**: sinais ocorridos na última barra (Diário/Semanal) dos tickers da watchlist

@@ -63,7 +63,16 @@
   .empty { padding: 6px 12px; color: var(--muted); font-size: 12px; }
 
   /* ---- charts */
-  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; min-height: 0; }
+  .charts { --split: 50%; display: grid; grid-template-columns: minmax(0, var(--split)) 10px minmax(0, 1fr);
+    column-gap: 2px; padding: 4px; min-height: 0; }
+  .splitter { cursor: col-resize; position: relative; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .splitter::after { content: ''; position: absolute; top: 0; bottom: 0; left: 4px; width: 2px;
+    border-radius: 1px; background: var(--border); transition: background .15s; }
+  .splitter:hover::after, .splitter.dragging::after { background: var(--accent); }
+  body.resizing { cursor: col-resize; user-select: none; -webkit-user-select: none; }
+  .legend, .col-title { user-select: none; -webkit-user-select: none; }
+  body.resizing .charts { pointer-events: none; }
+  body.resizing .splitter { pointer-events: auto; }
   .column { display: flex; flex-direction: column; min-height: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
   .col-title { padding: 4px 8px; font-weight: 600; background: var(--panel); border-bottom: 1px solid var(--border); }
   .pane { position: relative; min-height: 0; border-top: 1px solid var(--border); }
@@ -87,7 +96,8 @@
     .layout { grid-template-columns: 1fr; grid-template-rows: 220px 1fr; overflow-y: auto; }
     aside { border-right: 0; border-bottom: 1px solid var(--border); flex-direction: row; }
     aside > div { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .charts { grid-template-columns: 1fr; grid-auto-rows: 90vh; }
+    .charts { grid-template-columns: 1fr; grid-auto-rows: 90vh; gap: 4px; }
+    .splitter { display: none; }
   }
 </style>
 </head>
@@ -129,6 +139,7 @@
   </aside>
   <div class="charts">
     <section class="column" id="col-weekly"></section>
+    <div class="splitter" id="splitter" title="Arraste para redimensionar · duplo clique volta para 50/50"></div>
     <section class="column" id="col-daily"></section>
   </div>
 </div>
@@ -136,6 +147,6 @@
 <footer>Gráficos por <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a> · Dados: Yahoo Finance</footer>
 <div id="toasts"></div>
 <script src="lightweight-charts.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
