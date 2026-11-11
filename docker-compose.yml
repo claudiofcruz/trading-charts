@@ -1,0 +1,10 @@
+services:
+  trading-charts:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATA_DIR=/app/data
+    volumes:
+      - ./data:/app/data   # watchlist e desenhos persistem fora do container
+    restart: unless-stopped
