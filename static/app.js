@@ -18,10 +18,10 @@ const BASE = {
   timeScale: { borderColor: '#2a2e39', visible: false, rightOffset: 5 },
   crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
 };
-const RAY_FUTURE = 30;  // quantas barras o raio avança além do último candle
+const RAY_FUTURE = 30;  // how many bars the ray extends past the last candle
 const LINE = { lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false };
 
-// converte coluna -> dados do lightweight-charts (null vira "whitespace" para manter alinhamento)
+// column -> lightweight-charts data (null becomes "whitespace" to keep panes aligned)
 const col = (bars, key, colorFn) => bars.map((b, i) => {
   if (b[key] == null) return { time: b.time };
   const p = { time: b.time, value: b[key] };
@@ -30,7 +30,7 @@ const col = (bars, key, colorFn) => bars.map((b, i) => {
 });
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const fmt = v => v == null ? '—' : (Math.abs(v) >= 1000 ? v.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) : v.toFixed(2));
+const fmt = v => v == null ? '—' : (Math.abs(v) >= 1000 ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : v.toFixed(2));
 
 class Column {
   constructor(root, title, interval) {
@@ -56,7 +56,7 @@ class Column {
     this.sqzC = LightweightCharts.createChart(panes[3], { ...BASE, timeScale: { ...BASE.timeScale, visible: true } });
     this.charts = [this.main, this.rsiC, this.macdC, this.sqzC];
 
-    // ---- gráfico principal
+    // ---- main price chart
     this.candles = this.main.addCandlestickSeries({
       upColor: C.up, downColor: C.down, borderVisible: false, wickUpColor: C.up, wickDownColor: C.down,
     });
@@ -92,13 +92,13 @@ class Column {
     this.main.subscribeClick(param => onChartClick(this, param));
   }
 
-  // marcadores no candle = sinais do MACD + anotações de texto
+  // candle markers = MACD signals + text notes
   refreshCandleMarkers() {
     const all = [...this.macdMarkers, ...this.noteMarkers].sort((a, b) => a.time < b.time ? -1 : a.time > b.time ? 1 : 0);
     this.candles.setMarkers(all);
   }
 
-  // datas de barras futuras (dias úteis no diário, +7 dias no semanal)
+  // future bar dates (weekdays on daily, +7 days on weekly)
   futureTimes(count) {
     const out = [];
     const d = new Date(this.bars[this.bars.length - 1].time + 'T00:00:00Z');
@@ -110,7 +110,7 @@ class Column {
     return out;
   }
 
-  // pontos da linha: segmento p1→p2, ou (raio) de p1 até RAY_FUTURE barras à frente
+  // line points: segment p1→p2, or (ray) from p1 to RAY_FUTURE bars ahead
   trendPoints(d) {
     const [a, b] = [d.p1, d.p2].sort((x, y) => x.time < y.time ? -1 : 1);
     if (!d.ray) return [a, b].map(p => ({ time: p.time, value: p.price }));
@@ -194,7 +194,7 @@ class Column {
       return v >= 0 ? (v >= prev ? '#26a69a' : '#b2dfdb') : (v < prev ? '#ff5252' : '#ffcdd2');
     }));
 
-    // Up / Down signal: cruzamento da linha MACD com a linha de sinal
+    // Up / Down signal: MACD line crossing the signal line
     const markers = [];
     for (let i = 1; i < bars.length; i++) {
       const p = bars[i - 1], b = bars[i];
@@ -206,7 +206,7 @@ class Column {
         markers.push({ time: b.time, position: 'aboveBar', color: C.down, shape: 'arrowDown', size: 0.6 });
     }
     this.macd.setMarkers(markers);
-    this.macdMarkers = markers.map(m => ({ ...m, size: 0.8 }));  // mesmos sinais no gráfico de preço
+    this.macdMarkers = markers.map(m => ({ ...m, size: 0.8 }));  // same signals on the price chart
 
     this.sqzH.setData(col(bars, 'sqz', (b, i) => {
       const prev = bars[i - 1]?.sqz ?? 0, v = b.sqz;
@@ -217,7 +217,7 @@ class Column {
       color: b.sqz_state === 'on' ? C.dotOn : b.sqz_state === 'off' ? C.dotOff : C.dotNone,
     }));
 
-    // valores para sincronizar o crosshair entre painéis
+    // values used to sync the crosshair across panes
     const m = k => new Map(bars.filter(b => b[k] != null).map(b => [b.time, b[k]]));
     this.values = [m('close'), m('rsi'), m('macd'), m('sqz')];
 
@@ -234,7 +234,7 @@ class Column {
     this.legend.innerHTML = `
       <div><span>${b.time}</span>
         <span style="color:${color}">O ${fmt(b.open)} H ${fmt(b.high)} L ${fmt(b.low)} C ${fmt(b.close)} (${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%)</span>
-        <span style="color:var(--muted)">Vol ${b.volume?.toLocaleString('pt-BR') ?? '—'}</span></div>
+        <span style="color:var(--muted)">Vol ${b.volume?.toLocaleString('en-US') ?? '—'}</span></div>
       <div>
         <span style="color:${C.ema8}">EMA8 ${fmt(b.ema8)}</span>
         <span style="color:${C.ema21}">EMA21 ${fmt(b.ema21)}</span>
@@ -246,11 +246,11 @@ class Column {
 }
 
 
-// ============================================================ estado / API
+// ============================================================ state / API
 const $ = id => document.getElementById(id);
 const input = $('ticker'), status = $('status');
-const weekly = new Column($('col-weekly'), 'Semanal', '1wk');
-const daily = new Column($('col-daily'), 'Diário', '1d');
+const weekly = new Column($('col-weekly'), 'Weekly', '1wk');
+const daily = new Column($('col-daily'), 'Daily', '1d');
 const columns = [weekly, daily];
 
 const state = { ticker: null, drawings: [], watchlist: [], tool: null, pending: null };
@@ -270,12 +270,12 @@ const putJSON = (url, body) => api(url, { method: 'PUT', headers: { 'Content-Typ
 
 function setStatus(msg, error = false) { status.className = error ? 'error' : ''; status.textContent = msg; }
 
-// ============================================================ gráficos
+// ============================================================ charts
 async function load(ticker, { refresh = false } = {}) {
   ticker = ticker.trim().toUpperCase();
   if (!ticker) return;
   input.value = ticker;
-  if (!refresh) setStatus(`Carregando ${ticker}…`);
+  if (!refresh) setStatus(`Loading ${ticker}…`);
   try {
     const q = t => api(`/api/chart?ticker=${encodeURIComponent(ticker)}&interval=${t}`);
     const [w, d, drawings] = await Promise.all([q('1wk'), q('1d'),
@@ -286,7 +286,7 @@ async function load(ticker, { refresh = false } = {}) {
     weekly.setData(w.ticker, w.bars, keep);
     daily.setData(d.ticker, d.bars, keep);
     columns.forEach(c => c.renderDrawings(drawings));
-    setStatus(`${d.ticker} · atualizado ${new Date().toLocaleTimeString('pt-BR')}`);
+    setStatus(`${d.ticker} · updated ${new Date().toLocaleTimeString('en-US')}`);
     store.set('lastTicker', w.ticker);
     renderWatchlist();
   } catch (e) {
@@ -294,21 +294,21 @@ async function load(ticker, { refresh = false } = {}) {
   }
 }
 
-// ============================================================ desenhos
+// ============================================================ drawings
 function setTool(tool) {
   state.tool = state.tool === tool ? null : tool;
   state.pending = null;
   document.querySelectorAll('.tool[data-tool]').forEach(b => b.classList.toggle('active', b.dataset.tool === state.tool));
   document.body.classList.toggle('drawing', !!state.tool);
-  if (state.tool === 'trend' || state.tool === 'ray') setStatus(`${state.tool === 'ray' ? 'Raio' : 'Tendência'}: clique no 1º ponto (Esc cancela)`);
-  else if (state.tool === 'hline') setStatus('Horizontal: clique no preço desejado');
-  else if (state.tool === 'note') setStatus('Texto: clique no candle');
+  if (state.tool === 'trend' || state.tool === 'ray') setStatus(`${state.tool === 'ray' ? 'Ray' : 'Trend'}: click the 1st point (Esc cancels)`);
+  else if (state.tool === 'hline') setStatus('Horizontal: click the desired price');
+  else if (state.tool === 'note') setStatus('Text: click a candle');
 }
 
 async function saveDrawings() {
   columns.forEach(c => c.renderDrawings(state.drawings));
   try { await putJSON(`/api/drawings/${encodeURIComponent(state.ticker)}`, state.drawings); }
-  catch (e) { setStatus(`Erro ao salvar desenho: ${e.message}`, true); }
+  catch (e) { setStatus(`Error saving drawing: ${e.message}`, true); }
 }
 
 function onChartClick(column, param) {
@@ -321,14 +321,14 @@ function onChartClick(column, param) {
     state.drawings.push({ type: 'hline', price: +price.toFixed(4) });
   } else if (state.tool === 'note') {
     if (!time || !column.idx.has(time)) return;
-    const text = prompt('Texto da anotação:');
+    const text = prompt('Note text:');
     if (!text) return setTool(null);
     state.drawings.push({ type: 'note', interval: column.interval, time, text: text.slice(0, 60) });
   } else if (state.tool === 'trend' || state.tool === 'ray') {
-    if (!time || !column.idx.has(time)) return;   // precisa ser um candle real
+    if (!time || !column.idx.has(time)) return;   // must be a real candle
     if (!state.pending || state.pending.column !== column) {
       state.pending = { column, time, price };
-      return setStatus(`${state.tool === 'ray' ? 'Raio' : 'Tendência'}: clique no 2º ponto`);
+      return setStatus(`${state.tool === 'ray' ? 'Ray' : 'Trend'}: click the 2nd point`);
     }
     if (state.pending.time === time) return;
     state.drawings.push({ type: 'trend', ray: state.tool === 'ray', interval: column.interval,
@@ -342,7 +342,7 @@ function onChartClick(column, param) {
 document.querySelectorAll('.tool[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
 $('undo').onclick = () => { if (state.drawings.pop()) saveDrawings(); };
 $('clear').onclick = () => {
-  if (state.drawings.length && confirm(`Apagar todos os desenhos de ${state.ticker}?`)) { state.drawings = []; saveDrawings(); }
+  if (state.drawings.length && confirm(`Delete all drawings for ${state.ticker}?`)) { state.drawings = []; saveDrawings(); }
 };
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && state.tool) { setTool(null); setStatus(state.ticker || ''); }
@@ -367,23 +367,23 @@ function renderWatchlist() {
       : q.error ? `<span></span><span></span><div class="wl-err">${esc(q.error)}</div>`
       : `<span class="wl-price">${fmt(q.price)}</span>
          <span class="wl-chg" style="color:var(--${cls})">${q.change_pct >= 0 ? '+' : ''}${q.change_pct.toFixed(2)}%</span>
-         <div class="wl-badges">${badges(q.daily, 'D')}${badges(q.weekly, 'S')}</div>`;
+         <div class="wl-badges">${badges(q.daily, 'D')}${badges(q.weekly, 'W')}</div>`;
     return `<div class="wl-row ${t === state.ticker ? 'active' : ''}" data-t="${esc(t)}">
       <span class="wl-sym">${esc(t)}</span>${body}
-      <button class="wl-del" data-del="${esc(t)}" title="Remover">×</button></div>`;
-  }).join('') || '<div class="empty">Adicione tickers acima</div>';
+      <button class="wl-del" data-del="${esc(t)}" title="Remove">×</button></div>`;
+  }).join('') || '<div class="empty">Add tickers above</div>';
 
   const rows = [];
   for (const t of state.watchlist) {
     const q = scanData.get(t);
     if (!q || q.error) continue;
-    q.daily.forEach(s => rows.push([t, 'Diário', s]));
-    q.weekly.forEach(s => rows.push([t, 'Semanal', s]));
+    q.daily.forEach(s => rows.push([t, 'Daily', s]));
+    q.weekly.forEach(s => rows.push([t, 'Weekly', s]));
   }
   $('scanner').innerHTML = rows.map(([t, tf, s]) => `<div class="sc-row" data-t="${esc(t)}">
       <span class="wl-sym" style="width:56px">${esc(t)}</span><span class="sc-tf">${tf}</span>
       <span class="badge ${SIGNALS[s][1]}">${SIGNALS[s][0]}</span></div>`).join('')
-    || `<div class="empty">${scanData.size ? 'Nenhum sinal na última barra' : 'Carregando…'}</div>`;
+    || `<div class="empty">${scanData.size ? 'No signals on the last bar' : 'Loading…'}</div>`;
 }
 
 async function scan() {
@@ -428,7 +428,7 @@ function usMarketOpen() {
   }).formatToParts(new Date()).map(p => [p.type, p.value]));
   if (['Sat', 'Sun'].includes(parts.weekday)) return false;
   const mins = +parts.hour * 60 + +parts.minute;
-  return mins >= 9 * 60 + 30 && mins <= 16 * 60 + 15;  // pregão + 15 min p/ fechamento
+  return mins >= 9 * 60 + 30 && mins <= 16 * 60 + 15;  // session + 15 min for the close
 }
 
 const autoSel = $('auto');
@@ -436,12 +436,12 @@ autoSel.value = store.get('autoRefresh', '0');
 autoSel.onchange = () => { store.set('autoRefresh', autoSel.value); lastRefresh = Date.now(); };
 let lastRefresh = Date.now();
 
-// com alertas ligados e auto-atualização desligada, o scanner roda a cada 5 min
+// with alerts on and auto-refresh off, the scanner runs every 5 min
 setInterval(() => {
   const auto = +autoSel.value, every = auto || (alertsOn ? 5 : 0);
   if (!every) return;
   if (!usMarketOpen()) {
-    if (auto && state.ticker) setStatus(`${state.ticker} · mercado fechado (auto-atualização pausada)`);
+    if (auto && state.ticker) setStatus(`${state.ticker} · market closed (auto-refresh paused)`);
     return;
   }
   if (Date.now() - lastRefresh < every * 60_000 - 1000) return;
@@ -450,7 +450,7 @@ setInterval(() => {
   scan();
 }, 15_000);
 
-// ============================================================ alertas
+// ============================================================ alerts
 let alertsOn = store.get('alerts', '0') === '1';
 const alertBtn = $('alerts');
 alertBtn.classList.toggle('active', alertsOn);
@@ -462,7 +462,7 @@ alertBtn.onclick = async () => {
   if (alertsOn && 'Notification' in window && Notification.permission === 'default') {
     await Notification.requestPermission();
   }
-  setStatus(alertsOn ? 'Alertas ligados — sinais novos do scanner serão notificados' : 'Alertas desligados');
+  setStatus(alertsOn ? 'Alerts on — new scanner signals will be notified' : 'Alerts off');
   if (alertsOn) scan();
 };
 
@@ -473,7 +473,7 @@ function checkAlerts(results) {
   const seenSet = new Set(seen);
   for (const r of results) {
     if (r.error) continue;
-    for (const [tf, sigs, date] of [['Diário', r.daily, r.date], ['Semanal', r.weekly, r.weekly_date]]) {
+    for (const [tf, sigs, date] of [['Daily', r.daily, r.date], ['Weekly', r.weekly, r.weekly_date]]) {
       for (const s of sigs) {
         const key = `${r.ticker}|${tf}|${s}|${date}`;
         if (seenSet.has(key)) continue;
@@ -493,7 +493,7 @@ function notify(ticker, tf, sig, price) {
     const n = new Notification(title, { body, tag: `${ticker}|${tf}|${sig}` });
     n.onclick = () => { window.focus(); load(ticker); n.close(); };
   }
-  // aviso dentro da página (sempre, caso a notificação do sistema esteja bloqueada)
+  // in-page toast (always, in case system notifications are blocked)
   const el = document.createElement('div');
   el.className = `toast ${dir}`;
   el.innerHTML = `<b>${esc(title)}</b>${esc(body)}`;
@@ -502,10 +502,10 @@ function notify(ticker, tf, sig, price) {
   setTimeout(() => el.remove(), 15_000);
 }
 
-// ============================================================ divisória semanal | diário
+// ============================================================ weekly | daily splitter
 (() => {
   const charts = document.querySelector('.charts'), bar = $('splitter');
-  const MIN = 15, MAX = 85;  // % mínimo/máximo de cada lado
+  const MIN = 15, MAX = 85;  // min/max % for each side
   const apply = pct => charts.style.setProperty('--split', `${pct}%`);
   apply(+store.get('split', 50) || 50);
 
@@ -526,13 +526,13 @@ function notify(ticker, tf, sig, price) {
   };
   const start = e => {
     if (e.button !== undefined && e.button !== 0) return;
-    e.preventDefault();                       // evita seleção de texto / arrastar conteúdo
+    e.preventDefault();                       // prevents text selection / content dragging
     window.getSelection()?.removeAllRanges();
     dragging = true;
     bar.classList.add('dragging');
     document.body.classList.add('resizing');
   };
-  // eventos no documento inteiro: funciona mesmo com o mouse sobre os gráficos (Chrome, Safari, Firefox)
+  // document-level events: works even with the mouse over the charts (Chrome, Safari, Firefox)
   if (window.PointerEvent) {
     bar.addEventListener('pointerdown', start);
     document.addEventListener('pointermove', move);
@@ -549,7 +549,7 @@ function notify(ticker, tf, sig, price) {
   bar.addEventListener('dblclick', () => { apply(50); store.set('split', 50); });
 })();
 
-// ============================================================ início
+// ============================================================ startup
 $('go').onclick = () => load(input.value);
 input.addEventListener('keydown', e => e.key === 'Enter' && load(input.value));
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -104,49 +104,49 @@
 <body>
 <header>
   <h1>📈 Trading Charts</h1>
-  <input id="ticker" placeholder="Ticker (ex: AAPL)" autocomplete="off">
-  <button id="go">Carregar</button>
+  <input id="ticker" placeholder="Ticker (e.g. AAPL)" autocomplete="off">
+  <button id="go">Load</button>
   <div class="sep"></div>
-  <button class="tool" data-tool="trend" title="Linha de tendência: clique em 2 pontos">↗ Tendência</button>
-  <button class="tool" data-tool="ray" title="Raio: tendência estendida para a direita (2 pontos)">➚ Raio</button>
-  <button class="tool" data-tool="hline" title="Linha horizontal (aparece no semanal e no diário)">― Horizontal</button>
-  <button class="tool" data-tool="note" title="Anotação de texto em um candle">T Texto</button>
-  <button class="tool" id="undo" title="Desfazer último desenho">↶ Desfazer</button>
-  <button class="tool" id="clear" title="Apagar todos os desenhos deste ticker">🗑 Limpar</button>
+  <button class="tool" data-tool="trend" title="Trend line: click 2 points">↗ Trend</button>
+  <button class="tool" data-tool="ray" title="Ray: trend line extended to the right (2 points)">➚ Ray</button>
+  <button class="tool" data-tool="hline" title="Horizontal line (shown on weekly and daily)">― Horizontal</button>
+  <button class="tool" data-tool="note" title="Text note on a candle">T Text</button>
+  <button class="tool" id="undo" title="Undo last drawing">↶ Undo</button>
+  <button class="tool" id="clear" title="Delete all drawings for this ticker">🗑 Clear</button>
   <div class="sep"></div>
-  <label class="auto">Atualizar
+  <label class="auto">Refresh
     <select id="auto">
-      <option value="0">Desligado</option>
+      <option value="0">Off</option>
       <option value="1">1 min</option>
       <option value="5">5 min</option>
       <option value="15">15 min</option>
     </select>
   </label>
-  <button class="tool" id="alerts" title="Notificar quando um ticker da watchlist der sinal no scanner">🔔 Alertas</button>
+  <button class="tool" id="alerts" title="Notify when a watchlist ticker triggers a scanner signal">🔔 Alerts</button>
   <span id="status"></span>
 </header>
 <div class="layout">
   <aside>
     <div style="display:flex;flex-direction:column;flex:1.4;min-height:0">
       <h2>Watchlist</h2>
-      <div class="add"><input id="wl-add" placeholder="+ Adicionar ticker" autocomplete="off"></div>
+      <div class="add"><input id="wl-add" placeholder="+ Add ticker" autocomplete="off"></div>
       <div id="watchlist"></div>
     </div>
     <div style="display:flex;flex-direction:column;flex:1;min-height:0;border-top:1px solid var(--border)">
-      <h2>Scanner <span style="text-transform:none;letter-spacing:0">última barra</span></h2>
+      <h2>Scanner <span style="text-transform:none;letter-spacing:0">last bar</span></h2>
       <div id="scanner" style="border-top:0"></div>
     </div>
   </aside>
   <div class="charts">
     <section class="column" id="col-weekly"></section>
-    <div class="splitter" id="splitter" title="Arraste para redimensionar · duplo clique volta para 50/50"></div>
+    <div class="splitter" id="splitter" title="Drag to resize · double-click to reset to 50/50"></div>
     <section class="column" id="col-daily"></section>
   </div>
 </div>
 
-<footer>Gráficos por <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a> · Dados: Yahoo Finance</footer>
+<footer>Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts™</a> · Data: Yahoo Finance</footer>
 <div id="toasts"></div>
 <script src="lightweight-charts.js"></script>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

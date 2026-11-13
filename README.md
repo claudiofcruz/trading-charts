@@ -1,100 +1,100 @@
 # Trading Charts
 
-Gráficos Semanal + Diário lado a lado, estilo TradingView, para o mercado americano.
+Weekly + Daily charts side by side, TradingView style, for the US stock market.
 
 ![Trading Charts](TradingCharts.jpeg)
 
-## Funcionalidades
+## Features
 
-- Gráfico **Semanal** e **Diário** lado a lado, com zoom, rolagem e crosshair sincronizados entre os painéis
-- **Divisória arrastável** entre semanal e diário para ajustar a largura de cada um (duplo clique volta para 50/50)
-- Dados do Yahoo Finance (yfinance). Ex.: `AAPL`, `SPY`, `QQQ`, `NVDA`, `^GSPC`
-- **Watchlist** lateral (ordem alfabética) com preço, variação do dia e sinais
-- **Scanner**: sinais ocorridos na última barra (Diário/Semanal) dos tickers da watchlist
-- **Alertas 🔔**: notificação do navegador + aviso na página quando surge um sinal novo no scanner
-  (com auto-atualização desligada, o scanner roda a cada 5 min durante o pregão)
-- **Auto-atualização** (1/5/15 min), apenas com o mercado aberto (seg–sex, 9:30–16:15 de Nova York)
-- **Desenhos** por ticker: linha de tendência, raio (tendência estendida 30 barras à frente),
-  linha horizontal (aparece no semanal e no diário) e anotação de texto. Desfazer / Limpar; Esc cancela
-- Watchlist e desenhos ficam salvos em `data/` (no Docker, montado como volume)
+- **Weekly** and **Daily** charts side by side, with zoom, scrolling and crosshair synced across panes
+- **Draggable splitter** between weekly and daily to adjust each chart's width (double-click resets to 50/50)
+- Data from Yahoo Finance (yfinance). E.g. `AAPL`, `SPY`, `QQQ`, `NVDA`, `^GSPC`
+- **Watchlist** sidebar (alphabetical order) with price, daily change and signals
+- **Scanner**: signals that occurred on the last bar (Daily/Weekly) for the watchlist tickers
+- **Alerts 🔔**: browser notification + in-page toast when a new scanner signal appears
+  (with auto-refresh off, the scanner runs every 5 min during market hours)
+- **Auto-refresh** (1/5/15 min), only while the market is open (Mon–Fri, 9:30–16:15 New York time)
+- **Drawings** per ticker: trend line, ray (trend line extended 30 bars ahead),
+  horizontal line (shown on both weekly and daily) and text note. Undo / Clear; Esc cancels
+- Watchlist and drawings are saved in `data/` (mounted as a volume in Docker)
 
-## Indicadores
+## Indicators
 
-### Gráfico de preço
+### Price chart
 
-| Indicador | Parâmetros | Cor | O que mostra |
+| Indicator | Parameters | Color | What it shows |
 |---|---|---|---|
-| **Candles** | — | verde / vermelho | Abertura, máxima, mínima e fechamento de cada período. Verde = fechou acima da abertura; vermelho = fechou abaixo. |
-| **Volume** | — | verde / vermelho | Quantidade negociada no período, na parte de baixo do gráfico, com a mesma cor do candle. Volume alto confirma a força de um movimento. |
-| **EMA 8** | 8 períodos | 🟢 verde | Média móvel exponencial curta: tendência de curtíssimo prazo, reage rápido ao preço. |
-| **EMA 21** | 21 períodos | 🟡 amarelo | Tendência de curto prazo. Cruzamentos da EMA 8 com a 21 costumam indicar mudança de ritmo. |
-| **EMA 50** | 50 períodos | 🔵 azul | Tendência de médio prazo; funciona muitas vezes como suporte/resistência. |
-| **EMA 200** | 200 períodos | 🔴 vermelho | Tendência de longo prazo. Preço acima = viés de alta; abaixo = viés de baixa. |
-| **Bollinger Bands** | 20 períodos, 2 desvios | lilás (média tracejada) | Média de 20 períodos com bandas a 2 desvios-padrão. Bandas estreitas = baixa volatilidade (possível explosão de movimento); preço tocando as bandas = extremos relativos. |
-| **Setas MACD** | — | ▲ verde / ▼ vermelho | Os mesmos sinais de cruzamento do MACD (abaixo), repetidos sobre os candles. |
+| **Candles** | — | green / red | Open, high, low and close of each period. Green = closed above the open; red = closed below. |
+| **Volume** | — | green / red | Volume traded in the period, at the bottom of the chart, colored like its candle. High volume confirms the strength of a move. |
+| **EMA 8** | 8 periods | 🟢 green | Short exponential moving average: very short-term trend, reacts quickly to price. |
+| **EMA 21** | 21 periods | 🟡 yellow | Short-term trend. EMA 8 / EMA 21 crossovers often signal a change in pace. |
+| **EMA 50** | 50 periods | 🔵 blue | Medium-term trend; often acts as support/resistance. |
+| **EMA 200** | 200 periods | 🔴 red | Long-term trend. Price above = bullish bias; below = bearish bias. |
+| **Bollinger Bands** | 20 periods, 2 std dev | lilac (dashed basis) | 20-period average with bands at 2 standard deviations. Narrow bands = low volatility (a big move may follow); price touching the bands = relative extremes. |
+| **MACD arrows** | — | ▲ green / ▼ red | The same MACD crossover signals (below), repeated over the candles. |
 
-> EMA = *Exponential Moving Average*: dá mais peso aos preços recentes do que a média simples.
+> EMA = *Exponential Moving Average*: gives more weight to recent prices than a simple average.
 
-### RSI 14 — Índice de Força Relativa
+### RSI 14 — Relative Strength Index
 
-Linha roxa de 0 a 100 que mede a força dos ganhos versus as perdas nos últimos 14 períodos (método de Wilder).
+Purple line from 0 to 100 measuring the strength of gains versus losses over the last 14 periods (Wilder's method).
 
-- **Acima de 70**: sobrecomprado — o ativo subiu muito e rápido
-- **Abaixo de 30**: sobrevendido — caiu muito e rápido
-- **Linha de 50**: divisória entre momentum comprador e vendedor
+- **Above 70**: overbought — price rose a lot, fast
+- **Below 30**: oversold — price fell a lot, fast
+- **50 line**: divides bullish from bearish momentum
 
 ### MACD (12, 26, 9)
 
-Mede a diferença entre duas médias exponenciais para identificar tendência e momentum.
+Measures the difference between two exponential moving averages to identify trend and momentum.
 
-- **Linha MACD** (azul): EMA 12 − EMA 26
-- **Linha de sinal** (laranja): EMA 9 da linha MACD
-- **Histograma**: MACD − sinal
-  - verde forte = positivo e crescendo · verde claro = positivo e perdendo força
-  - vermelho forte = negativo e caindo · rosa claro = negativo e perdendo força
-- **▲ Up** (verde): MACD cruza a linha de sinal **para cima** — momentum de alta
-- **▼ Down** (vermelho): MACD cruza a linha de sinal **para baixo** — momentum de baixa
+- **MACD line** (blue): EMA 12 − EMA 26
+- **Signal line** (orange): EMA 9 of the MACD line
+- **Histogram**: MACD − signal
+  - strong green = positive and growing · light green = positive and losing strength
+  - strong red = negative and falling · light pink = negative and losing strength
+- **▲ Up** (green): MACD crosses the signal line **upward** — bullish momentum
+- **▼ Down** (red): MACD crosses the signal line **downward** — bearish momentum
 
 ### Squeeze Momentum (LazyBear)
 
-Identifica períodos de **compressão de volatilidade** (o preço "acumula energia") e a direção provável quando ela é liberada.
+Identifies periods of **volatility compression** (price "building up energy") and the likely direction when it is released.
 
-O *squeeze* acontece quando as Bollinger Bands (20) ficam **dentro** do Canal de Keltner (20, 1,5 × ATR).
+A *squeeze* happens when the Bollinger Bands (20) are **inside** the Keltner Channel (20, 1.5 × ATR).
 
-**Pontos na linha zero:**
-- ⚪ **branco** = squeeze ligado — volatilidade comprimida, movimento forte pode estar próximo
-- ⚫ **cinza** = squeeze liberado — a compressão terminou (o "disparo")
-- 🔵 **azul** = sem squeeze
+**Dots on the zero line:**
+- ⚪ **white** = squeeze on — compressed volatility, a strong move may be near
+- ⚫ **gray** = squeeze released — the compression has ended (the "fire")
+- 🔵 **blue** = no squeeze
 
-**Histograma (momentum)** — regressão linear do preço em relação ao meio do range dos últimos 20 períodos:
-- verde claro = momentum positivo aumentando · verde escuro = positivo diminuindo
-- vermelho = momentum negativo aumentando · vinho = negativo diminuindo
+**Histogram (momentum)** — linear regression of price relative to the middle of the last 20 periods' range:
+- light green = positive momentum increasing · dark green = positive decreasing
+- red = negative momentum increasing · maroon = negative decreasing
 
-O cálculo segue o script original do LazyBear no TradingView (inclusive o uso de 1,5 desvio nas Bollinger internas do squeeze), para os valores baterem com os de lá.
+The calculation follows LazyBear's original TradingView script (including its use of 1.5 std dev for the inner squeeze Bollinger Bands), so values match TradingView.
 
-### Sinais do Scanner
+### Scanner signals
 
-O scanner verifica apenas a **última barra** (hoje no diário, esta semana no semanal). Na watchlist o prefixo indica o tempo gráfico: **D** = Diário, **S** = Semanal.
+The scanner checks only the **last bar** (today on daily, this week on weekly). In the watchlist the prefix shows the timeframe: **D** = Daily, **W** = Weekly.
 
-| Sinal | Significado |
+| Signal | Meaning |
 |---|---|
-| **MACD ▲** | MACD cruzou a linha de sinal para cima |
-| **MACD ▼** | MACD cruzou a linha de sinal para baixo |
-| **Squeeze ▲** | Squeeze liberado com momentum positivo (rompimento provável para cima) |
-| **Squeeze ▼** | Squeeze liberado com momentum negativo (rompimento provável para baixo) |
+| **MACD ▲** | MACD crossed above the signal line |
+| **MACD ▼** | MACD crossed below the signal line |
+| **Squeeze ▲** | Squeeze released with positive momentum (likely upside breakout) |
+| **Squeeze ▼** | Squeeze released with negative momentum (likely downside breakout) |
 
-> Durante o pregão a última barra ainda está em formação, então um sinal pode aparecer e desaparecer até o fechamento.
+> During market hours the last bar is still forming, so a signal may appear and disappear until the close.
 
-## Rodar com Docker
+## Run with Docker
 
     docker compose up -d --build
 
-Abra http://localhost:8000
+Open http://localhost:8000
 
-## Rodar sem Docker
+## Run without Docker
 
     ./run_local.sh
 
 ---
 
-*Ferramenta de estudo/análise. Não é recomendação de investimento. Os dados do Yahoo Finance podem ter atraso de ~15 minutos.*
+*Study/analysis tool. Not investment advice. Yahoo Finance data may be delayed by ~15 minutes.*

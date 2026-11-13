@@ -1,4 +1,4 @@
-"""Backend: baixa cotações (Yahoo Finance) e calcula os indicadores."""
+"""Backend: downloads quotes (Yahoo Finance) and computes the indicators."""
 import json
 import os
 import time
@@ -13,18 +13,18 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Trading Charts")
 
-# período de histórico baixado por intervalo (precisa de folga p/ a EMA 200)
+# history downloaded per interval (needs enough bars for the EMA 200)
 PERIODS = {"1d": "5y", "1wk": "15y"}
 
 _cache: dict[tuple[str, str], tuple[float, list]] = {}
-CACHE_TTL = 60  # segundos
+CACHE_TTL = 60  # seconds
 
 
 def normalize_ticker(ticker: str) -> str:
     return ticker.strip().upper()
 
 
-# ---------------------------------------------------------------- indicadores
+# ---------------------------------------------------------------- indicators
 def ema(s: pd.Series, n: int) -> pd.Series:
     return s.ewm(span=n, adjust=False).mean()
 
@@ -39,7 +39,7 @@ def rsi(close: pd.Series, n: int = 14) -> pd.Series:
 
 
 def linreg(s: pd.Series, n: int) -> pd.Series:
-    """Equivalente ao linreg(src, n, 0) do Pine Script."""
+    """Equivalent to Pine Script linreg(src, n, 0)."""
     x = np.arange(n, dtype=float)
     xm = x.mean()
     denom = ((x - xm) ** 2).sum()
@@ -52,10 +52,10 @@ def linreg(s: pd.Series, n: int) -> pd.Series:
 
 
 def squeeze_momentum(df: pd.DataFrame, length=20, mult=2.0, kc_length=20, kc_mult=1.5):
-    """Squeeze Momentum Indicator (LazyBear) - mesma lógica do script do TradingView.
+    """Squeeze Momentum Indicator (LazyBear) - same logic as the TradingView script.
 
-    Obs.: o script original usa multKC (1.5) também no desvio das Bollinger
-    do squeeze; reproduzimos isso para bater com o TradingView.
+    Note: the original script also uses multKC (1.5) for the Bollinger deviation
+    inside the squeeze; we reproduce that so values match TradingView.
     """
     c, h, l = df["Close"], df["High"], df["Low"]
 
@@ -104,7 +104,7 @@ def build(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-# --------------------------------------------------------------- dados/cache
+# --------------------------------------------------------------- data/cache
 def get_bars(symbol: str, interval: str) -> list[dict]:
     key = (symbol, interval)
     hit = _cache.get(key)
@@ -114,11 +114,11 @@ def get_bars(symbol: str, interval: str) -> list[dict]:
     try:
         df = yf.Ticker(symbol).history(period=PERIODS[interval], interval=interval, auto_adjust=False)
     except Exception as e:  # noqa: BLE001
-        raise HTTPException(502, f"Erro ao baixar dados: {e}")
+        raise HTTPException(502, f"Error downloading data: {e}")
 
     df = df.dropna(subset=["Open", "High", "Low", "Close"])
     if df.empty:
-        raise HTTPException(404, f"Nenhum dado encontrado para {symbol}")
+        raise HTTPException(404, f"No data found for {symbol}")
 
     data = build(df)
     data.index = [d.strftime("%Y-%m-%d") for d in data.index]
@@ -131,7 +131,7 @@ def get_bars(symbol: str, interval: str) -> list[dict]:
 
 
 def last_bar_signals(bars: list[dict]) -> list[str]:
-    """Sinais ocorridos na última barra (hoje no diário / esta semana no semanal)."""
+    """Signals on the last bar (today on daily / this week on weekly)."""
     if len(bars) < 2:
         return []
     p, b = bars[-2], bars[-1]
@@ -151,14 +151,14 @@ def last_bar_signals(bars: list[dict]) -> list[str]:
 @app.get("/api/chart")
 def chart(ticker: str = Query(..., min_length=1), interval: str = Query("1d")):
     if interval not in PERIODS:
-        raise HTTPException(400, "interval deve ser 1d ou 1wk")
+        raise HTTPException(400, "interval must be 1d or 1wk")
     symbol = normalize_ticker(ticker)
     return {"ticker": symbol, "interval": interval, "bars": get_bars(symbol, interval)}
 
 
 @app.get("/api/scan")
 def scan(tickers: str = Query(..., min_length=1)):
-    """Cotação + sinais (diário e semanal) para cada ticker da watchlist."""
+    """Quote + signals (daily and weekly) for each watchlist ticker."""
     symbols = list(dict.fromkeys(normalize_ticker(t) for t in tickers.split(",") if t.strip()))
 
     def one(sym: str) -> dict:
@@ -183,7 +183,7 @@ def scan(tickers: str = Query(..., min_length=1)):
         return list(ex.map(one, symbols))
 
 
-# ------------------------------------------------- persistência (data/*.json)
+# --------------------------------------------------- persistence (data/*.json)
 DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
 DATA_DIR.mkdir(exist_ok=True)
 WATCHLIST_FILE = DATA_DIR / "watchlist.json"
@@ -205,7 +205,7 @@ def _write(path: Path, value) -> None:
 
 
 def sort_tickers(tickers: list[str]) -> list[str]:
-    """Ordem alfabética, ignorando o prefixo ^ de índices (^XSP fica junto do X)."""
+    """Alphabetical order, ignoring the ^ index prefix (^XSP sorts with X)."""
     return sorted(tickers, key=lambda t: (t.lstrip("^"), t))
 
 

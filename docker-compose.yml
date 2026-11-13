@@ -6,5 +6,5 @@ services:
     environment:
       - DATA_DIR=/app/data
     volumes:
-      - ./data:/app/data   # watchlist e desenhos persistem fora do container
+      - ./data:/app/data   # watchlist and drawings persist outside the container
     restart: unless-stopped
